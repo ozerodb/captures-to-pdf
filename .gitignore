@@ -1,3 +1,7 @@
+# Project specific, ignore generated .pdf and last_settings.json
+*.pdf
+last_settings.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
