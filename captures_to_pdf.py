@@ -68,6 +68,7 @@ def runCapture():
         return
     compress_to_zip = chk_state.get()
     imagelist = []
+    window.iconify()
     for i in range(3,0,-1):
         print('Minimize me, starting in',i,'seconds')
         sleep(1)
@@ -84,6 +85,7 @@ def runCapture():
             newzip.write((filename.rstrip()+'.pdf'))
         os.remove(filename.rstrip()+'.pdf')
     print('Done')
+    window.deiconify()
     last={}
     last['upleft_x_entry'] = upl_x
     last['upleft_y_entry'] = upl_y
