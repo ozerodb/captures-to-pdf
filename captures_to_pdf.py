@@ -87,8 +87,8 @@ if __name__ == "__main__":
 
     root = tk.Tk()
     root.geometry('550x290')
-    root.resizable(1, 1)
-    root.title("Captures to PDF")
+    root.resizable(0, 0)
+    root.title("Captures to PDF - v0.2")
 
     ### TOP FRAME ###
     frame1 = tk.LabelFrame(root, text="Capture area")
