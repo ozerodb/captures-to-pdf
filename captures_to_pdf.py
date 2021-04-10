@@ -5,17 +5,14 @@ from tkinter import scrolledtext
 from tkinter import messagebox
 
 # imports needed for image acquisition and pdf creation
-from PIL import ImageGrab, Image
+from PIL import ImageGrab
 from time import sleep
 import keyboard
 
 # other
 import json
-import shutil
-from zipfile import ZipFile
 from pathlib import Path
 import os
-import sys
 from threading import Thread
 
 ### FUNCTIONS ###
@@ -33,11 +30,18 @@ def runCapture():
     if upl_x < 0 or upl_y < 0 or botr_x < 0 or botr_y < 0:
         messagebox.showerror('Invalid value', 'Coordinates can\'t be < 0')
         return
-    screenshot_num = var.get()
+    screenshot_num = screenshots_n_var.get()
     if screenshot_num < 1:
         messagebox.showerror(
             'Invalid value', 'Screenshots number can\'t be < 1')
         return
+    delay = float(delay_var.get())
+    if delay < 0.1 or delay > 10:
+        messagebox.showerror(
+            'Invalid value', 'Delay can\'t be < 0.1 or > 10')
+        return
+    key = keyCombo.get()
+    keyIndex = keyCombo.current()
     filename = outname_entry.get()
     filename = filename.replace('.pdf', '')
     if filename == '':
@@ -55,8 +59,8 @@ def runCapture():
         print('Taking image number ', i+1)
         im = ImageGrab.grab(bbox=(upl_x, upl_y, botr_x, botr_y))
         imagelist.append(im)
-        keyboard.press_and_release('page down')
-        sleep(1)
+        keyboard.press_and_release(key)
+        sleep(delay)
     print('Saving PDF to', get_abs_path
           (filename.rstrip()+'.pdf'))
     imagelist[0].save(get_abs_path
@@ -71,6 +75,8 @@ def runCapture():
     last['botright_x_entry'] = botr_x
     last['botright_y_entry'] = botr_y
     last['screnshot_num'] = screenshot_num
+    last['delay'] = delay
+    last['key'] = keyIndex
     with open(get_abs_path
               ('last_settings.json'), 'w') as json_file:
         json.dump(last, json_file)
@@ -88,7 +94,7 @@ if __name__ == "__main__":
     root = tk.Tk()
     root.geometry('550x290')
     root.resizable(0, 0)
-    root.title("Captures to PDF - v0.2")
+    root.title("Captures to PDF - v0.3")
 
     ### TOP FRAME ###
     frame1 = tk.LabelFrame(root, text="Capture area")
@@ -123,16 +129,40 @@ if __name__ == "__main__":
     ### LEFT FRAME ###
     frame2 = tk.LabelFrame(root, text="Capture settings")
     frame2.place(relx=0.018, rely=0.344, relheight=0.54, relwidth=0.37)
+
     tk.Label(frame2, text="Number of captures").place(
-        relx=0.049, rely=0.191, height=21, width=124, bordermode='ignore')
-    var = tk.IntVar()
-    tk.Spinbox(frame2, from_=1, to=1000, textvariable=var).place(
-        relx=0.734, rely=0.191, relheight=0.127, relwidth=0.227, bordermode='ignore')
+        relx=0.05, rely=0.15, height=21, width=124, bordermode='ignore')
+    screenshots_n_var = tk.IntVar()
+    tk.Spinbox(frame2, from_=1, to=1000, textvariable=screenshots_n_var).place(
+        relx=0.75, rely=0.15, relheight=0.127, relwidth=0.227, bordermode='ignore')
+
+    tk.Label(frame2, text="Delay between captures").place(
+        relx=0.05, rely=0.30, height=21, width=124, bordermode='ignore')
+    delay_var = tk.StringVar()
+    tk.Spinbox(frame2, from_=0.1, to=10, textvariable=delay_var, increment=0.1).place(
+        relx=0.75, rely=0.30, relheight=0.127, relwidth=0.227, bordermode='ignore')
+
+    tk.Label(frame2, text="Simulated keypress").place(
+        relx=0.05, rely=0.45, height=21, width=100, bordermode='ignore')
+    keyCombo = ttk.Combobox(frame2,
+                 values=[
+                     "up",
+                     "down",
+                     "left",
+                     "right",
+                     "page up",
+                     "page down",
+                     "space",
+                     "enter"],
+                 state="readonly")
+    keyCombo.place(relx=0.57, rely=0.45, height=21,
+                                         relwidth=0.4, bordermode='ignore')
+    keyCombo.current(0)
 
     tk.Label(frame2, text="Output file name (without '.pdf')").place(
-        relx=0.049, rely=0.446, height=21, width=190, bordermode='ignore')
+        relx=0.049, rely=0.60, height=21, width=190, bordermode='ignore')
     outname_entry = tk.Entry(frame2)
-    outname_entry.place(relx=0.049, rely=0.573, height=20,
+    outname_entry.place(relx=0.049, rely=0.75, height=20,
                         relwidth=0.906, bordermode='ignore')
 
     ### RIGHT FRAME ###
@@ -163,6 +193,12 @@ if __name__ == "__main__":
         if 'botright_y_entry' in last:
             botright_y_entry.insert(tk.END, last['botright_y_entry'])
         if 'screnshot_num' in last:
-            var.set(last['screnshot_num'])
+            screenshots_n_var.set(last['screnshot_num'])
+        if 'delay' in last:
+            delay_var.set(last['delay'])
+        if 'key' in last:
+            keyCombo.current(last['key'])
 
+    # OTHER
+    insertIntoLog("Doesn't work yet")
     root.mainloop()
