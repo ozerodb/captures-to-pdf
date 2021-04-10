@@ -14,6 +14,7 @@ import json
 from pathlib import Path
 import os
 from threading import Thread
+from pynput.mouse import Listener
 
 ### FUNCTIONS ###
 
@@ -87,14 +88,41 @@ def insertIntoLog(str):
     logscroll.insert(tk.INSERT, str)
     logscroll.config(state=tk.DISABLED)
 
+clicked_x = 0
+clicked_y = 0
+def on_click(x, y, button, pressed):
+    global clicked_x
+    global clicked_y
+    clicked_x, clicked_y = x, y
+    return False
+
+def click_upleft_coord():
+    with Listener(on_click=on_click) as listener:
+        root.iconify()
+        listener.join()
+        upleft_x_entry.delete(0,tk.END)
+        upleft_y_entry.delete(0,tk.END)
+        upleft_x_entry.insert(tk.END, clicked_x)
+        upleft_y_entry.insert(tk.END, clicked_y)
+        root.deiconify()
+
+def click_botright_coord():
+    with Listener(on_click=on_click) as listener:
+        root.iconify()
+        listener.join()
+        botright_x_entry.delete(0,tk.END)
+        botright_y_entry.delete(0,tk.END)
+        botright_x_entry.insert(tk.END, clicked_x)
+        botright_y_entry.insert(tk.END, clicked_y)
+        root.deiconify()
 
 if __name__ == "__main__":
     base_path = os.getcwd()
-
+    
     root = tk.Tk()
-    root.geometry('550x290')
+    root.geometry('550x300')
     root.resizable(0, 0)
-    root.title("Captures to PDF - v0.3")
+    root.title("Captures to PDF - v0.4")
 
     ### TOP FRAME ###
     frame1 = tk.LabelFrame(root, text="Capture area")
@@ -104,27 +132,31 @@ if __name__ == "__main__":
                                                         rely=0.313, height=22, width=113, bordermode='ignore')
     tk.Label(frame1, text="x").place(relx=0.275, rely=0.104,
                                      height=21, width=32, bordermode='ignore')
-    tk.Label(frame1, text="y").place(relx=0.362, rely=0.104,
+    tk.Label(frame1, text="y").place(relx=0.360, rely=0.104,
                                      height=21, width=31, bordermode='ignore')
     upleft_x_entry = tk.Entry(frame1)
     upleft_x_entry.place(relx=0.275, rely=0.313, height=20,
                          relwidth=0.064, bordermode='ignore')
     upleft_y_entry = tk.Entry(frame1)
-    upleft_y_entry.place(relx=0.362, rely=0.313, height=20,
+    upleft_y_entry.place(relx=0.360, rely=0.313, height=20,
+                         relwidth=0.064, bordermode='ignore')
+    tk.Button(frame1, text="Click", command=click_upleft_coord).place(relx=0.450, rely=0.313, height=20,
                          relwidth=0.064, bordermode='ignore')
 
-    tk.Label(frame1, text="Bottom-right coordinates").place(relx=0.534,
+    tk.Label(frame1, text="Bottom-right coordinates").place(relx=0.450,
                                                             rely=0.635, height=21, width=141, bordermode='ignore')
-    tk.Label(frame1, text="x:").place(relx=0.809, rely=0.417,
+    tk.Label(frame1, text="x").place(relx=0.715, rely=0.417,
+                                      height=22, width=32, bordermode='ignore')
+    tk.Label(frame1, text="y").place(relx=0.800, rely=0.417,
                                       height=22, width=32, bordermode='ignore')
     botright_x_entry = tk.Entry(frame1)
-    botright_x_entry.place(relx=0.809, rely=0.635, height=20,
+    botright_x_entry.place(relx=0.715, rely=0.635, height=20,
                            relwidth=0.064, bordermode='ignore')
-    tk.Label(frame1, text="y:").place(relx=0.896, rely=0.417,
-                                      height=22, width=32, bordermode='ignore')
     botright_y_entry = tk.Entry(frame1)
-    botright_y_entry.place(relx=0.896, rely=0.635, height=20,
+    botright_y_entry.place(relx=0.800, rely=0.635, height=20,
                            relwidth=0.064, bordermode='ignore')
+    tk.Button(frame1, text="Click", command=click_botright_coord).place(relx=0.890, rely=0.635, height=20,
+                         relwidth=0.064, bordermode='ignore')
 
     ### LEFT FRAME ###
     frame2 = tk.LabelFrame(root, text="Capture settings")
